@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'books.apps.BooksConfig',
+    'user_auth.apps.UserAuthConfig',
 ]
 
 MIDDLEWARE = [
@@ -117,6 +119,17 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 
 USE_TZ = True
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+REDIS_HOST = os.environ.get('REDIS_HOST', "localhost")
+REDIS_PORT = os.environ.get('REDIS_PORT', 6380)
+
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 
 # Static files (CSS, JavaScript, Images)

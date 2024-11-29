@@ -11,12 +11,17 @@ class Book(models.Model):
         validators=[MinValueValidator(1900)]
     )
     description = models.TextField(verbose_name="Описание")
-    image = models.ImageField(verbose_name="Изображение")
+    image = models.ImageField(
+        null=True,
+        blank=True,
+        verbose_name="Изображение",
+    )
     rating = models.IntegerField(
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         verbose_name="Рейтинг"
     )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __repr__(self):
         return f"{self.__class__}({self.title}, {self.year})"

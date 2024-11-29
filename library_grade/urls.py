@@ -17,12 +17,25 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path, include
 from django.views.static import serve
 
+from books.sitemaps import StaticBookSitemap, BookSitemap
+from user_auth.sitemaps import StaticAuthSitemap
+
+sitemaps = {
+    "books_static": StaticBookSitemap,
+    "auth_static": StaticAuthSitemap,
+    "books": BookSitemap,
+}
+
+
 urlpatterns = [
     path('books/', include('books.urls'), name='books'),
+    path('auth/', include('user_auth.urls'), name='user_auth'),
     path('admin/', admin.site.urls),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Books</title>
+</head>
+<body>
+    <h1>Import Books</h1>
+    <form id="uploadForm" action="import-books" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Выберите CSV-файл:</label>
+        <input type="file" id="file" name="file" accept=".csv" required/>
+        <button type="submit">Выгрузить</button>
+    </form>
+</body>
+</html>
