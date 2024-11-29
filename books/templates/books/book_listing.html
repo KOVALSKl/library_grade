@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Добавленные книги</title>
+    <link rel="stylesheet" href="{% static 'css/style.css'%}"/>
+</head>
+
+<body>
+    <main class="main">
+        <div class="listing">
+            {% block content %}
+<!--            <h2>Ваши последние добавленные книги</h2>-->
+            <ul class="last-added-books">
+                {% if books %}
+                    {% for book in books %}
+                        {% include "./book_listing_item.html" %}
+                    {% endfor %}
+                {% else %}
+                    <h3>Вы еще не добавили ни одной книги...</h3>
+                {% endif %}
+            </ul>
+            {% endblock %}
+        </div>
+        <div class="listing-settings">
+            <div class="listing-settings-block">
+                <h3 class="listing-settings-block__title">
+                    Действия
+                </h3>
+                <div class="action-link">
+                    <a href="{% url 'books:create' %}" class="action-link">
+                        Добавить книгу
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>

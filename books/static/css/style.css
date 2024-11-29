@@ -1,0 +1,242 @@
+* {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* LISTING */
+main.main {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: space-evenly;
+
+    padding: 20px;
+}
+
+
+main .listing {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+
+    gap: 20px;
+}
+
+main .listing ul.last-added-books {
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+    flex-wrap: wrap;
+    /*flex-direction: column;*/
+
+    gap: 20px;
+}
+
+/* BOOK-ITEM */
+
+.book-item {
+    display: flex;
+    gap: 20px;
+
+    border: 1px solid gray;
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    width: fit-content;
+    max-width: 600px;
+    padding-right: 20px;
+
+    position: relative;
+}
+
+.book-item .rating-value,
+.book-content-main-list-item .rating-value {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+
+    cursor: default;
+}
+
+.book-item .rating-value span,
+.book-content-main-list-item .rating-value {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.book-item .cover-image {
+    max-width: 200px;
+    overflow: hidden;
+    position: relative;
+
+    display: flex;
+}
+
+.book-item .cover-image img {
+    width: 100%;
+}
+
+.book-item .book-content {
+    padding: 20px 0;
+}
+
+.book-item .book-content,
+.book-content .book-content-main .book-content-main-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 20px;
+}
+
+.book-item .book-content .book-content__title,
+.book-content .book-content-main .book-content-main-list,
+.book-content .book-content-main .book-content-main-list h3 {
+    padding: 0;
+    margin: 0;
+}
+
+.book-item .book-content .book-content__title {
+    font-size: 30px;
+}
+
+.book-content .book-content-main {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    height: 100%;
+    width: 100%;
+
+    gap: 20px;
+}
+
+.book-content-main .book-content-main-list-item .rating-value {
+    position: initial;
+}
+
+.action-link,
+.action-link:link,
+.action-link:active,
+.action-link:visited {
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+
+    color: hsla(237, 91%, 34%, 0.85);
+    transition: color 300ms linear;
+}
+
+.action-link:hover {
+    color: hsla(237, 91%, 34%, 0.5);
+}
+
+.book-content .book-content-main .book-content-main-list {
+    list-style-type: none;
+}
+
+main.main.detail {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: row;
+
+    gap: 20px;
+}
+
+main.main.detail .cover-image {
+    width: 40%;
+}
+
+main.main.detail .cover-image img {
+    width: 100%;
+}
+
+main.main.detail .book-content {
+    width: 100%;
+}
+
+main.main .listing-settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 20px;
+}
+
+main.main .listing-settings .listing-settings-block {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 15px;
+}
+
+main.main .listing-settings-block .filters {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    gap: 20px;
+}
+
+main.main .listing-settings-block .filters .filters-form,
+main.main .listing-settings-block .filters .filters-form div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+main.main .listing-settings-block .filters .filters-form {
+    gap: 10px;
+}
+
+.filters .filters-actions input.form-action {
+    background: transparent;
+    border: none;
+}
+
+.filters .filters-actions a.form-action,
+.filters .filters-actions a.form-action:link,
+.filters .filters-actions a.form-action:active,
+.filters .filters-actions a.form-action:visited {
+    text-decoration: none;
+    color: rgba(0,0,0,1);
+}
+
+.filters .filters-actions a.form-action,
+.filters .filters-actions input.form-action {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+
+    padding: 3px 2px;
+    border: 1px solid rgba(0,0,0,1);
+    border-radius: 5px;
+
+    text-align: center;
+
+    transition: color 300ms linear, border 300ms linear;
+}
+
+.filters .filters-actions a.form-action:hover,
+.filters .filters-actions input.form-action:hover {
+    border: 1px solid rgba(0,0,0,0.5);
+    color: rgba(0,0,0,0.5);
+}
