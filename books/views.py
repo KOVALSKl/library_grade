@@ -113,10 +113,7 @@ class BookListingView(TokenMixin, TemplateView):
         return self.render_to_response(context)
 
     def get_queryset(self, **kwargs):
-        if bool(kwargs):
-            return self.model.objects.filter(**kwargs)
-
-        return self.model.objects.all()
+        return self.model.objects.all().order_by("created_at")
 
 
 class BookDetailView(TemplateView):
