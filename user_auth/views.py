@@ -1,19 +1,20 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.http import Http404, JsonResponse, HttpResponse
-from django.shortcuts import render
-from django.views.generic import FormView, TemplateView, CreateView
-from django.views.generic.edit import ModelFormMixin
-from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse_lazy
+from django.views.generic import FormView, CreateView, View
 
+from books.views import TokenMixin
 from user_auth.forms import LoginForm, RegisterForm
 
 
-class UserLoginView(FormView):
+class UserLoginView(TokenMixin, FormView):
     template_name = 'user_auth/user_login.html'
     form_class = LoginForm
     model = User
+    object = None
+    success_url = reverse_lazy('books:index')
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -34,11 +35,10 @@ class UserLoginView(FormView):
                 raise ValidationError("Не верный пароль", code=403)
 
             self.object = user
-            token = RefreshToken.for_user(self.object)
-            response = HttpResponse({
-                "token": str(token),
-            })
-            response.set_cookie("token", str(token), token.lifetime, secure=True)
+            token = self.generate_token(request.user)
+
+            response = HttpResponseRedirect(self.get_success_url())
+            response.set_cookie("token", token)
 
             return response
 
@@ -46,11 +46,12 @@ class UserLoginView(FormView):
             return self.form_invalid(form)
 
 
-class UserRegistrationView(CreateView):
+class UserRegistrationView(TokenMixin, CreateView):
     template_name = 'user_auth/user_register.html'
     form_class = RegisterForm
     object = None
     model = User
+    success_url = reverse_lazy("books:index")
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -62,11 +63,22 @@ class UserRegistrationView(CreateView):
         self.object.set_password(self.object.password)
         self.object.save()
 
-        token = RefreshToken.for_user(self.object)
-        response = HttpResponse({
-            "token": str(token),
-        })
-        response.set_cookie("token", str(token), token.lifetime, secure=True)
+        token = self.generate_token(request.user)
+
+        response = HttpResponseRedirect(self.get_success_url())
+        response.set_cookie("token", token)
+
+        return response
+
+
+class UserLogoutView(TokenMixin, View):
+    success_url = reverse_lazy("books:index")
+
+    def get(self, request, *args, **kwargs):
+        token = self.check_token(request.COOKIES.get("token"))
+
+        response = HttpResponseRedirect(self.success_url)
+        response.delete_cookie("token")
 
         return response
 

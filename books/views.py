@@ -1,21 +1,17 @@
+import jwt
 import pandas as pd
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.conf import settings
 
 import logging
 
+from django.core.paginator import Paginator, PageNotAnInteger
 from django.http import Http404, HttpResponseRedirect, HttpResponse
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, CreateView, FormView
+from django.views.generic import TemplateView
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.edit import FormMixin
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from books.forms import BookForm, FileUploadForm
 from books.models import Book
@@ -24,17 +20,37 @@ from books.tasks import process_books_data
 logger = logging.getLogger(__name__)
 
 
-class TokenValidationMixin:
-    def check_token(self, token_str):
-        if token_str is None:
-            raise ValidationError("Необходимо зарегестрироваться или войти в акканут")
-
-        token = RefreshToken(token_str)
+class TokenMixin:
+    @staticmethod
+    def generate_token(user):
+        token = jwt.encode({
+            "pk": user.pk,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "exp": settings.JWT_EXPIRATION_TIME,
+        },
+            settings.JWT_SECRET,
+            algorithm=settings.JWT_ALGORITHM,
+        )
 
         return token
 
+    @staticmethod
+    def check_token(token):
+        try:
+            decoded_token = jwt.decode(
+                token,
+                settings.JWT_SECRET,
+                algorithms=[settings.JWT_ALGORITHM]
+            )
+        except jwt.exceptions.PyJWTError as error:
+            print(error)
+            decoded_token = None
 
-class BookCreateView(TokenValidationMixin, FormMixin, TemplateResponseMixin, View):
+        return decoded_token
+
+
+class BookCreateView(TokenMixin, FormMixin, TemplateResponseMixin, View):
     model = Book
     form_class = BookForm
     template_name = 'books/book_form.html'
@@ -42,10 +58,17 @@ class BookCreateView(TokenValidationMixin, FormMixin, TemplateResponseMixin, Vie
 
     async def get(self, request, *args, **kwargs):
         token = self.check_token(request.COOKIES.get('token'))
+
+        if token is None:
+            return HttpResponse("Ошибка токена авторизации", status=status.HTTP_401_UNAUTHORIZED)
+
         return self.render_to_response(self.get_context_data())
 
     async def post(self, request, *args, **kwargs):
         token = self.check_token(request.COOKIES.get('token'))
+
+        if token is None:
+            return HttpResponse("Ошибка токена авторизации", status=status.HTTP_401_UNAUTHORIZED)
 
         form = self.get_form()
 
@@ -58,7 +81,7 @@ class BookCreateView(TokenValidationMixin, FormMixin, TemplateResponseMixin, Vie
         return HttpResponseRedirect(self.get_success_url())
 
 
-class BookListingView(TemplateView):
+class BookListingView(TokenMixin, TemplateView):
     template_name = 'books/book_listing.html'
     model = Book
 
@@ -66,7 +89,26 @@ class BookListingView(TemplateView):
         context = self.get_context_data(**kwargs)
         books = self.get_queryset()
 
-        context["books"] = books
+        limit = request.GET.get("limit", settings.PAGE_LIMIT)
+        page_number = request.GET.get("page", 1)
+
+        books_paginator = Paginator(books, limit)
+
+        try:
+            page = books_paginator.page(page_number)
+        except PageNotAnInteger:
+            page = books_paginator.page(1)
+
+        token = self.check_token(request.COOKIES.get('token'))
+        print(token)
+
+        is_not_authorized = False
+
+        if token is None:
+            is_not_authorized = True
+
+        context["is_not_authorized"] = is_not_authorized
+        context["page_obj"] = page
 
         return self.render_to_response(context)
 
@@ -99,13 +141,17 @@ class BookDetailView(TemplateView):
         return context
 
 
-class BookImportView(TokenValidationMixin, FormMixin, TemplateResponseMixin, View):
+class BookImportView(TokenMixin, FormMixin, TemplateResponseMixin, View):
     template_name = 'books/book_import.html'
     form_class = FileUploadForm
     success_url = reverse_lazy("books:index")
 
     async def get(self, request, *args, **kwargs):
         token = self.check_token(request.COOKIES.get('token'))
+
+        if token is None:
+            return HttpResponse("Ошибка токена авторизации", status=status.HTTP_401_UNAUTHORIZED)
+
         return self.render_to_response(self.get_context_data())
 
     async def post(self, request, *args, **kwargs):
@@ -122,7 +168,7 @@ class BookImportView(TokenValidationMixin, FormMixin, TemplateResponseMixin, Vie
             elif uploaded_file.name.endswith(('.xls', '.xlsx')):
                 df = pd.read_excel(uploaded_file)
             else:
-                return HttpResponse({'error': 'Unsupported file format'}, status=status.HTTP_400_BAD_REQUEST)
+                return HttpResponse('Неподдерживаемый формат файла', status=status.HTTP_400_BAD_REQUEST)
 
             data = df.to_dict(orient='records')
             task = process_books_data.delay(data)

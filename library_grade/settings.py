@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import datetime
+from datetime import timezone
 from pathlib import Path
 
 from django.conf.global_settings import STATICFILES_DIRS
@@ -131,6 +133,12 @@ CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
+JWT_SECRET = os.environ.get('JWT_SECRET', 'secret')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_TIME = datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=1)
+
+
+PAGE_LIMIT = 6
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -138,9 +146,7 @@ BACKEND_HOST = os.environ.get("BACKEND_HOST", "localhost")
 BACKEND_PORT = os.environ.get("BACKEND_PORT", "3030")
 BACKEND_URL = "http://" + BACKEND_HOST + ":" + BACKEND_PORT
 
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, 'staticfiles/'),
-# )
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = 'static/'
 MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')

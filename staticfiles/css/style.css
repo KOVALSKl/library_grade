@@ -50,6 +50,7 @@ main .listing ul.last-added-books {
     overflow: hidden;
 
     width: fit-content;
+    min-width: 450px;
     max-width: 600px;
     padding-right: 20px;
 
@@ -206,6 +207,17 @@ main.main .listing-settings-block .filters .filters-form div {
 main.main .listing-settings-block .filters .filters-form {
     gap: 10px;
 }
+
+
+.pagination-article {
+    display: flex;
+    width: 100%;
+
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
 
 .filters .filters-actions input.form-action {
     background: transparent;

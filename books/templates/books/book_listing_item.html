@@ -10,6 +10,13 @@
             {{book.rating}}
         </span>
     </div>
+    <div class="cover-image">
+        {% if book.image %}
+            <img src="{{ book.image.url }}"/>
+        {% else %}
+            <b>Фотографии не загружено</b>
+        {% endif %}
+    </div>
     <div class="book-content">
         <h2 class="book-content__title">
             {{ book.title }}

@@ -311,4 +311,7 @@ cython_debug/
 .idea/
 
 # STATICFILES
-./staticfiles
+staticfiles
+staticfiles/*
+staticfiles/*/
+.DS_Store

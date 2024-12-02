@@ -11,10 +11,9 @@
     <main class="main">
         <div class="listing">
             {% block content %}
-<!--            <h2>Ваши последние добавленные книги</h2>-->
             <ul class="last-added-books">
-                {% if books %}
-                    {% for book in books %}
+                {% if page_obj.object_list %}
+                    {% for book in page_obj.object_list %}
                         {% include "./book_listing_item.html" %}
                     {% endfor %}
                 {% else %}
@@ -24,21 +23,55 @@
             {% endblock %}
         </div>
         <div class="listing-settings">
+            {% if not is_not_authorized %}
+                <div class="listing-settings-block">
+                    <h3 class="listing-settings-block__title">
+                        Действия
+                    </h3>
+                    <div class="action-link">
+                        <a href="{% url 'books:create' %}" class="action-link">
+                            Добавить книгу
+                        </a>
+                    </div>
+                    <div class="action-link">
+                        <a href="{% url 'books:import-books' %}" class="action-link">
+                            Импортировать книгу
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
             <div class="listing-settings-block">
                 <h3 class="listing-settings-block__title">
-                    Действия
+                    Авторизация
                 </h3>
-                <div class="action-link">
-                    <a href="{% url 'books:create' %}" class="action-link">
-                        Добавить книгу
-                    </a>
-                </div>
-                <div class="action-link">
-                    <a href="{% url 'books:import-books' %}" class="action-link">
-                        Импортировать книгу
-                    </a>
-                </div>
+                {% if is_not_authorized %}
+                    <div class="action-link">
+                        <a href="{% url 'user_auth:login' %}" class="action-link">
+                            Войти
+                        </a>
+                    </div>
+                    <div class="action-link">
+                        <a href="{% url 'user_auth:registration' %}" class="action-link">
+                            Зарегистрироваться
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="action-link">
+                        <a href="{% url 'user_auth:logout' %}" class="action-link">
+                            Выйти
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </main>
+    <div class="pagination-article">
+        {%if page_obj.has_previous %}
+            <a href="?page={{page_obj.previous_page_number}}"><</a>
+        {% endif %}
+        <span>{{page_obj.number}}</span>
+        {%if page_obj.has_next %}
+            <a href="?page={{page_obj.next_page_number}}">></a>
+        {% endif %}
+    </div>
 </body>
