@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.db.models.query import RawQuerySet
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, CreateView, View
@@ -23,13 +24,13 @@ class UserLoginView(TokenMixin, FormView):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
-            users_filter = (Q(username=username))
-            founded_users = self.model.objects.filter(users_filter)
+            db_query = f"SELECT * FROM {self.model._meta.db_table} WHERE username = %s"
+            founded_users = self.model.objects.raw(db_query, [username])
 
-            if not founded_users.exists():
+            if len(founded_users) == 0:
                 raise Http404("Пользователь не найден")
 
-            user = founded_users.last()
+            user = founded_users[-1]
 
             if not user.check_password(password):
                 raise ValidationError("Не верный пароль", code=403)
@@ -63,7 +64,7 @@ class UserRegistrationView(TokenMixin, CreateView):
         self.object.set_password(self.object.password)
         self.object.save()
 
-        token = self.generate_token(request.user)
+        token = self.generate_token(self.object)
 
         response = HttpResponseRedirect(self.get_success_url())
         response.set_cookie("token", token)

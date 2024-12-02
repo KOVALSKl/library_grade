@@ -139,12 +139,12 @@ class BookDetailView(TemplateView):
 
 
 class BookImportView(TokenMixin, FormMixin, TemplateResponseMixin, View):
-    template_name = 'books/book_import.html'
+    template_name = "books/book_import.html"
     form_class = FileUploadForm
     success_url = reverse_lazy("books:index")
 
     async def get(self, request, *args, **kwargs):
-        token = self.check_token(request.COOKIES.get('token'))
+        token = self.check_token(request.COOKIES.get("token"))
 
         if token is None:
             return HttpResponse("Ошибка токена авторизации", status=status.HTTP_401_UNAUTHORIZED)
@@ -157,15 +157,15 @@ class BookImportView(TokenMixin, FormMixin, TemplateResponseMixin, View):
         if not form.is_valid():
             return self.form_invalid(form)
 
-        uploaded_file = request.FILES['file']
+        uploaded_file = request.FILES["file"]
 
         try:
-            if uploaded_file.name.endswith('.csv'):
+            if uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
-            elif uploaded_file.name.endswith(('.xls', '.xlsx')):
+            elif uploaded_file.name.endswith((".xls", ".xlsx")):
                 df = pd.read_excel(uploaded_file)
             else:
-                return HttpResponse('Неподдерживаемый формат файла', status=status.HTTP_400_BAD_REQUEST)
+                return HttpResponse("Неподдерживаемый формат файла", status=status.HTTP_400_BAD_REQUEST)
 
             data = df.to_dict(orient='records')
             task = process_books_data.delay(data)
